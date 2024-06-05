@@ -1,1 +1,1 @@
-# This folder is dedicated to the code used for detecting Ultra sound signals
+# This folder is dedicated to the code used for detecting Ultrasound signals
