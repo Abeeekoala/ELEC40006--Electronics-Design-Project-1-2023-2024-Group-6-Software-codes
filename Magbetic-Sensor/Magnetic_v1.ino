@@ -23,5 +23,12 @@ void loop() {
   Serial.print(" V, Deviation: ");
   Serial.print(deviation);
   Serial.println(" V");
+   // Check the deviation and print the corresponding pole detection
+  if (deviation > 0.15) {
+    Serial.println("South pole detected");
+  } else if (deviation < -0.15) {
+    Serial.println("North pole detected");
+  }
+  
 }
 
