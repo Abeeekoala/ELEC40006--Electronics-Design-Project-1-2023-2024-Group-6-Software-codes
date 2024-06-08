@@ -7,4 +7,4 @@ Rover_control files are the programs that combine the rover's remote control and
 
 Rover_control_v1 includes the four directions controlled by the 'W', 'A', 'S', and 'D' keys and the Ultrasound name detection feature with 'E' to detect and 'R' to refresh.
 
-![Serial snippet](images/Rover_control_v1.jpg)
+![Rover_control_v1_webpage](images/Rover_control_v1_demo.jpg)
