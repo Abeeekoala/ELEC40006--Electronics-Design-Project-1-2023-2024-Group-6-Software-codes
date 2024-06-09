@@ -11,8 +11,8 @@
 
 
 // Replace with your network credentials
-const char ssid[] = "Aurel iPhone";
-const char pass[] = "12345678";
+const char ssid[] = "XXXXX";
+const char pass[] = "XXXXX";
 
 
 const int groupNumber = 0; // Set your group number to make the IP address constant - only do this on the EEERover network
