@@ -11,7 +11,7 @@ Sensor_holder_v2.stl is not optimized for 3D printing, the professor suggested w
 
 Sensor_holder_v3 folder contains all the files for the holder
 The following are the photos of the assembled sensor holder
-<img src="../images/holder_side.jpg" style="transform: rotate(90deg);" alt="Side view of the holder">
-![Holder top viewl_v1_webpage](../images/holder_top.jpg){style="transform: rotate(90deg);"}
+![Holder side viewl_v1_webpage](../images/holder_side.jpg)
+![Holder top viewl_v1_webpage](../images/holder_top.jpg)
 ![Holder bottom view](../images/holder_bottom.jpg)
 
