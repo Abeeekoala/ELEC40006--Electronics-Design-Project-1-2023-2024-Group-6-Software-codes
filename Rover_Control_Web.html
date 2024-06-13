@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rover Remote Control Center</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    margin: 0;
+    position: relative;
+    background-image: url('images/background.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: repeat;
+    flex-wrap: wrap;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .panel-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .panel {
+    text-align: center;
+    border: 2px solid #ddd;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    margin: 10px;
+    width: 45%; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .control-panel {
+    width: 300px; 
+    height: auto;
+  }
+  .control-panel h1 {
+    margin-top: 0px;
+  }
+  .detection-panel {
+    width: auto; 
+    margin-left: 20px;
+  }
+  .detection-panel h1 {
+    margin-top: 0px;
+    margin-bottom: 0px; 
+  }
+  .main-title {
+    font-size: 48px;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  th {
+    background-color: #f2f2f200;
+  }
+
+  .directional-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    align-items: center;
+    justify-content: center;
+    width: 270px;
+    height: 270px;
+    margin: auto;
+  }
+  .btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+    height: 70px;
+    margin: auto; 
+    background-color: #33c4f042;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+  .btn:hover, .btn.active {
+    background-color: #4CAF50;
+  }
+  .forward {
+    grid-column: 2;
+    grid-row: 1;
+    border-radius: 10px;
+    transform: rotate(0deg);
+  }
+  .left {
+    grid-column: 1;
+    grid-row: 2;
+    border-radius: 10px;
+    transform: rotate(-90deg);
+  }
+  .forwardLeft {
+    grid-column: 1;
+    grid-row: 1;
+    border-radius: 10px;
+    transform: rotate(-45deg);
+  }
+  .stop {
+    grid-column: 2;
+    grid-row: 2;
+    border-radius: 7px;
+    clip-path: none; 
+    width: 70px;
+    height: 70px;
+    background-color: #33c4f042;
+  }
+  .right {
+    grid-column: 3;
+    grid-row: 2;
+    border-radius: 10px;
+    transform: rotate(90deg);
+  }
+  .forwardRight {
+    grid-column: 3;
+    grid-row: 1;
+    border-radius: 10px;
+    transform: rotate(45deg);
+  }
+  .backward {
+    grid-column: 2;
+    grid-row: 3;
+    border-radius: 10px;
+    transform: rotate(180deg);
+  }
+  .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .action-btn {
+    padding: 10px 20px;
+    background-color: #33c4f042;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+  }
+  .action-btn:hover {
+    background-color: #4CAF50;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="main-title">Rover Remote Control Center</div>
+  <div class="panel-container">
+    <div class="panel control-panel">
+      <h1>Movement Control</h1>
+      <div class="directional-buttons">
+        <div class="btn forward" onclick="sendCommand('forward')"></div>
+        <div class="btn left" onclick="sendCommand('left')"></div>
+        <div class="btn stop" onclick="sendCommand('stop')"></div>
+        <div class="btn right" onclick="sendCommand('right')"></div>
+        <div class="btn forwardRight" onclick="sendCommand('forwardLeft')"></div>
+        <div class="btn forwardLeft" onclick="sendCommand('forwardRight')"></div>
+        <div class="btn backward" onclick="sendCommand('backward')"></div>
+      </div>
+    </div>
+    <div class="panel detection-panel">
+      <h1>Lizard Detection</h1>
+      <table id="lizardTable">
+        <tr>
+          <th>Name</th>
+          <th>Infrared (<span class="math-tex">\(Hz\)</span>)</th>
+          <th>Radio (<span class="math-tex">\(Hz\)</span>)</th>
+          <th>Magnetic Pole (<span class="math-tex">\(N/S\)</span>)</th>
+          <th>Species</th>
+        </tr>
+      </table>
+      <div class="button-group">
+        <button class="action-btn" onclick="scan()">Scan</button>
+        <button class="action-btn" onclick="deleteRow()">Delete Row</button>
+        <button class="action-btn" onclick="addTestData()">Testing</button>
+      </div>      
+      <div class="button-group">
+        <button class="action-btn" onclick="detectName()">Detect Name</button>
+        <button class="action-btn" onclick="detectInfrared()">Detect Infrared</button>
+        <button class="action-btn" onclick="detectRadio()">Detect Radio</button>
+        <button class="action-btn" onclick="detectMagnetic()">Detect Magnetic</button>
+      </div>
+      <p>Detected Name: <span id="name">N/A</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  var boardIP = '172.20.10.4'; 
+  var keyState = {}; // Object to track the state of arrow keys
+  
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("name").innerHTML = this.responseText;
+    }
+  };
+  
+  function sendCommand(command) {
+    $.get(`http://${boardIP}/${command}`, function(data) {
+      console.log("Response: " + data);
+    });
+  }
+    
+  function updateTable(name, infrared, radio, magnetic, species) {
+    var table = document.getElementById("lizardTable");
+    var row = table.insertRow(-1); // Insert a row at the end of the table
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    var cell3 = row.insertCell(2);
+    var cell4 = row.insertCell(3);
+    cell1.innerHTML = name; 
+    cell2.innerHTML = infrared;
+    cell3.innerHTML = radio;
+    cell4.innerHTML = magnetic;
+    cell5.innerHTML = species;
+    }
+    
+  function scan() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var resp = JSON.parse(this.responseText);
+        updateTable(resp.name, resp.infrared, resp.radio, resp.magnetic, resp.species);
+      }
+    };
+    xhttp.open("GET", `http://${boardIP}/scan`, true);
+    xhttp.send();
+    setTimeout(function() {
+      xhttp.open("GET", `http://${boardIP}/scan`, true);
+      xhttp.send();
+    }, 1000);
+  }
+
+  function deleteRow() {
+      var table = document.getElementById("lizardTable");
+      var rowCount = table.rows.length;
+      if (rowCount > 1) { 
+        table.deleteRow(rowCount - 1);
+      }
+    }
+
+  function detectName() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var name = this.responseText;
+        console.log("Received:", this.responseText);
+        updateLastRow('name', name);
+        document.getElementById("name").innerHTML = this.responseText;
+      }
+    };
+    xhttp.open("GET", `http://${boardIP}/detectName`, true);
+    xhttp.send();
+  }
+
+  function detectInfrared() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var infrared = this.responseText;
+        updateLastRow('infrared', infrared);
+      }
+    };
+    xhttp.open("GET", `http://${boardIP}/detectIR`, true);
+    xhttp.send();
+  }
+
+  function detectRadio() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var radio = this.responseText;
+        updateLastRow('radio', radio);
+      }
+    };
+    xhttp.open("GET", `http://${boardIP}/detectRadio`, true);
+    xhttp.send();
+  }
+
+  function detectMagnetic() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var magnetic = this.responseText;
+        updateLastRow('magnetic', magnetic);
+      }
+    };
+    xhttp.open("GET", `http://${boardIP}/detectMagnetic`, true);
+    xhttp.send();
+  }
+
+  function updateLastRow(column, value) {
+    var table = document.getElementById("lizardTable");
+    var rowCount = table.rows.length;
+    if (rowCount > 1) {
+      var lastRow = table.rows[rowCount - 1];
+      switch (column) {
+        case 'name':
+          lastRow.cells[0].innerHTML = value;
+          break;
+        case 'infrared':
+          lastRow.cells[1].innerHTML = value;
+          break;
+        case 'radio':
+          lastRow.cells[2].innerHTML = value;
+          break;
+        case 'magnetic':
+          lastRow.cells[3].innerHTML = value;
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  function addTestData() {
+    var table = document.getElementById("lizardTable");
+    var row = table.insertRow(-1);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    var cell3 = row.insertCell(2);
+    var cell4 = row.insertCell(3);
+    var cell5 = row.insertCell(4);
+
+    var name = "#" +  Math.random().toString(36).substring(9);
+    var infrared = Math.floor(Math.random() * 1000);
+    var radio = Math.floor(Math.random() * 1000);
+    var magnetic = Math.random() > 0.5 ? "N" : "S";
+    var species = Math.random().toString(36).substring(7);
+
+    cell1.innerHTML = name;
+    cell2.innerHTML = infrared;
+    cell3.innerHTML = radio;
+    cell4.innerHTML = magnetic;
+    cell5.innerHTML = species;
+  }
+
+  document.addEventListener('keydown', function(event) {
+    const command = keyMappings(event.key);
+    if (command && !keyState[event.key]) {
+      keyState[event.key] = true; // Mark this key as pressed
+      sendCommand(command);
+      document.querySelector('.' + command).classList.add('active');
+    }
+  });
+  
+  document.addEventListener('keyup', function(event) {
+    const command = keyMappings(event.key);
+    if (command) {
+      keyState[event.key] = false; // Mark this key as not pressed
+      sendCommand('stop'); // Send stop command when key is released
+      document.querySelector('.' + command).classList.remove('active');
+    }
+  });
+  
+  function keyMappings(key) {
+    switch (key) {
+      case 'ArrowUp': return 'forward';
+      case 'ArrowDown': return 'backward';
+      case 'ArrowLeft': return 'left';
+      case 'ArrowRight': return 'right';
+      case 'w': return 'forward';
+      case 's': return 'backward';
+      case 'a': return 'left';
+      case 'd': return 'right';
+      case 'q': return 'forwardLeft';
+      case 'e': return 'forwardRight';
+      case ' ': return 'stop';
+    }
+  }
+  window.addEventListener("keydown", function(e) {
+    if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+      e.preventDefault();
+    }
+  }, false);
+  </script>  
+</body>
+</html>
