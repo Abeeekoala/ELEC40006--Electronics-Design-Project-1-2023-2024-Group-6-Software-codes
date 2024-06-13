@@ -9,8 +9,8 @@
 #include <avr/pgmspace.h>
 
 // Replace with your network credentials
-const char ssid[] = "Abraham iPhone";
-const char pass[] = "koala5269";
+const char ssid[] = "XXXXX";
+const char pass[] = "XXXXX";
 
 const int groupNumber = 0; // Set your group number to make the IP address constant - only do this on the EEERover network
 
