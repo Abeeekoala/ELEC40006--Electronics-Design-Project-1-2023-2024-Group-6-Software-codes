@@ -201,6 +201,7 @@
         <button class="action-btn" onclick="scan()">Scan</button>
         <button class="action-btn" onclick="deleteRow()">Delete Row</button>
         <button class="action-btn" onclick="addTestData()">Testing</button>
+        <button class="action-btn" onclick="classifySpecies()">Species Classify</button>
       </div>      
       <div class="button-group">
         <button class="action-btn" onclick="detectName()">Detect Name</button>
@@ -363,6 +364,38 @@
     cell4.innerHTML = magnetic;
     cell5.innerHTML = species;
   }
+  
+  function classifySpecies() {
+    var table = document.getElementById("lizardTable");
+    var rowCount = table.rows.length;
+    if (rowCount > 1) {
+      var lastRow = table.rows[rowCount - 1];
+      var infrared = parseInt(lastRow.cells[1].innerHTML.replace('Hz', ''));
+      var radio = parseInt(lastRow.cells[2].innerHTML.replace('Hz', ''));
+      var magnetic = lastRow.cells[3].innerHTML;
+      var species = "";
+      if (infrared > 550 && radio < 10 && magnetic === 'N') {
+        species = "Abronia";
+      } else if (infrared < 10 && radio > 100 && magnetic === 'N') {
+        species = "Elgaria";
+      } else if (infrared > 330 && radio < 10 && magnetic === 'S') {
+        species = "Dixonius";
+      } else if (infrared < 10 && radio > 180 && magnetic === 'S') {
+        species = "Cophotis";
+      } else {
+        species = "Unknown";
+      }
+
+      // Update the species cell in the last row
+      if (lastRow.cells.length > 4) {
+        lastRow.cells[4].innerHTML = species;
+      } else {
+        var cell5 = lastRow.insertCell(4);
+        cell5.innerHTML = species;
+      }
+    }
+  }
+  
 
   document.addEventListener('keydown', function(event) {
     const command = keyMappings(event.key);
