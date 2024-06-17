@@ -323,6 +323,8 @@ void detectRadio(){
 void resetRadio(){
   radio_frequency = 0;
   intervalRA = 0;
+  lastTimeRA = 0;
+  currentTimeRA = 0;
 }
 
 void detectIR(){
@@ -348,6 +350,8 @@ void detectIR(){
 void resetIR(){
   IR_frequency = 0;
   intervalIR = 0;
+  lastTimeIR = 0;
+  currentTimeIR = 0;
 }
 
 
@@ -497,9 +501,4 @@ void setup() {
 void loop() {
  server.handleClient(); 
 }
-
-
-
-
-
 
