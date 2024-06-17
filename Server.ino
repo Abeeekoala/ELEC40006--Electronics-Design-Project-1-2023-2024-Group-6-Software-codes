@@ -2,33 +2,33 @@
 #define USE_WIFI101           true
 
 
-#include <WiFiWebServer.h>
+#include <WiFiWebServer.h>    //  libraries to include
 #include <string.h>
 #include <SPI.h>
 #include <Ethernet.h>
 #include <avr/pgmspace.h>
 
-// Replace with your network credentials
-const char ssid[] = "XXXXX";
-const char pass[] = "XXXXX";
+// Network credentials
+const char ssid[] = "Aurel iPhone";     // Network name
+const char pass[] = "12345678";         // network password
 
 const int groupNumber = 0; // Set your group number to make the IP address constant - only do this on the EEERover network
 
 // Define motor control pins
-const int DIR1_PIN = 4; // Direction pin for left motor
-const int PWM1_PIN = 3; // PWM pin for left motor
-const int DIR2_PIN = 8; // Direction pin for right motor
-const int PWM2_PIN = 9; // PWM pin for right motor
-const int signalPinRadio = 1;
-const int signalPinIR = 2;
-const int hallSensorPin = A0;
+const int DIR1_PIN = 4;       // Direction pin for left motor
+const int PWM1_PIN = 3;       // PWM pin for left motor
+const int DIR2_PIN = 8;       // Direction pin for right motor
+const int PWM2_PIN = 9;       // PWM pin for right motor
+const int signalPinRadio = 1; // Pin for Radio read
+const int signalPinIR = 2;    // Pin for IR read
+const int hallSensorPin = A0; // Pin for Analog magnetic read 
 
-WiFiWebServer server(80);
-const unsigned long TIMEOUT_MS = 200;
+WiFiWebServer server(80);               // default http port 
+const unsigned long TIMEOUT_MS = 200;   // default timeout time for detection 
 
-String nameDetected = "N/A";
-float IR_frequency = 0;
-float radio_frequency = 0;
+String nameDetected = "N/A";            // Variables for the lizard charateristics 
+float IR_frequency = 0;                 
+float radio_frequency = 0;              
 String magnetic = "Unknown";
 String species = "Unknown";
 
@@ -37,15 +37,13 @@ bool messageComplete = false;             // Indicates message completion
 static char buffer[5];                    // Buffer to store 4 characters + null terminator
 static int bufferIndex = 0;               // Index to track the buffer position
 
-unsigned long lastTimeIR = 0;
+unsigned long lastTimeIR = 0;             // variables to calulate the infrared and radio frequencies 
 unsigned long currentTimeIR = 0;
 unsigned long intervalIR = 0;
 unsigned long lastTimeRA = 0;
 unsigned long currentTimeRA = 0;
 unsigned long intervalRA = 0;
-
-
-bool lastStateIR = LOW;
+bool lastStateIR = LOW;   
 bool currentStateIR = LOW;
 bool lastStateRadio = LOW;
 bool currentStateRadio = LOW;
@@ -84,13 +82,13 @@ const float referenceVoltage = 3.3;       // Reference voltage for the ADC
 //Allow data to send to different origins look up CORS for more details
 void applyCORSHeaders() { 
   server.sendHeader("Access-Control-Allow-Origin", "*", true);                      // allows outside access to server
-  server.sendHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS", true);   // allows the listed methods from outside sources
+  server.sendHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS", true);    // allows the listed methods from outside sources
   server.sendHeader("Access-Control-Allow-Headers", "*", true);
 }
 
 // Return the web page
 void handleRoot() {
-  Serial.println("Root page requested");
+  Serial.println("Root page requested");        // print for requesting the page, used for debugging
   // server.send(200, F("text/html"), webpage); old obsolete way of sending document object model
 }
 
@@ -149,26 +147,26 @@ void turnRight() {
 void turnLeftSlow() {
   applyCORSHeaders();
   server.send(200, F("text/plain"), F("Left"));
-  Serial.println("Turn Left");
+  Serial.println("Turn Left Slow");
   stopMotors(); // Ensure motors are stopped before changing direction
   delay(100); // Brief delay to ensure motors stop
   digitalWrite(DIR1_PIN, LOW);
-  analogWrite(PWM1_PIN, 40); 
+  analogWrite(PWM1_PIN, 60); 
   digitalWrite(DIR2_PIN, HIGH);
-  analogWrite(PWM2_PIN, 40); 
+  analogWrite(PWM2_PIN, 60); 
 
 }
 // Turn right movement control for rover
 void turnRightSlow() {
   applyCORSHeaders();
   server.send(200, F("text/plain"), F("Right"));
-  Serial.println("Turn Right");
+  Serial.println("Turn Right Slow");
   stopMotors(); // Ensure motors are stopped before changing direction
   delay(100); // Brief delay to ensure motors stop
   digitalWrite(DIR1_PIN, HIGH);
-  analogWrite(PWM1_PIN, 40); 
+  analogWrite(PWM1_PIN, 60); 
   digitalWrite(DIR2_PIN, LOW);
-  analogWrite(PWM2_PIN, 40); 
+  analogWrite(PWM2_PIN, 60); 
 }
 
 void turnForwardLeft() {
@@ -205,11 +203,11 @@ void stopMotors() {
 }
 
 void detectName() {
-  unsigned long startTime = millis();  // Record the start time
-  Serial.println("Detecting Name");
+  unsigned long startTime = millis();                     // Record the start time
+  Serial.println("Detecting Name");                       // debug print for detect name
 
-  while (true) {
-    if (millis() - startTime >= TIMEOUT_MS) {
+  while (true) {                                          
+    if (millis() - startTime >= TIMEOUT_MS) {             // if timeout time reahed then return 
       applyCORSHeaders();
       Serial.println("Detection timed out.");
       nameDetected = "N/A";
@@ -217,40 +215,31 @@ void detectName() {
       return;
     }
 
-    // Check if there are any bytes available to read from Serial1
-    if (Serial1.available()) {
-      // Read the incoming byte from the UART port
-      char incomingByte = Serial1.read();
+    if (Serial1.available()) {                      // Check if there are any bytes available to read from Serial1 
+      char incomingByte = Serial1.read();           // Read the incoming byte from the UART port 
 
-      // Print the received byte
-      Serial.print("Received byte: ");
-      Serial.println(incomingByte, BIN);  // Print as binary
-
-      // Filter out noise
-      if (incomingByte < 32 || incomingByte > 126) {
-        Serial.println("Noise detected, ignoring byte.");
+      Serial.print("Received byte: ");              // Print the received byte
+      Serial.println(incomingByte, BIN);            // Print as binary
+      if (incomingByte < 32 || incomingByte > 126) {        // Filter out noise
+        Serial.println("Noise detected, ignoring byte.");  
         continue;
       }
-
       Serial.print("Character: ");
-      Serial.println(incomingByte);
+      Serial.println(incomingByte);                 // Print the received byte
 
-      // Store the byte in the buffer if it's part of the 4-character name
-      if (bufferIndex < 4) {
+      if (bufferIndex < 4) {                        // Store the byte in the buffer if it's part of the 4-character name
         buffer[bufferIndex++] = incomingByte;
       }
 
-      // Check if the buffer contains a 4-character name starting with '#'
-      if (bufferIndex == 4) {
-        buffer[bufferIndex] = '\0';  // Null-terminate the buffer
-        if (buffer[0] == '#') {
-          Serial.print("Detected name: ");
-          Serial.println(buffer);
-          nameDetected = String(buffer);  // Save the detected name
-          break;
+      if (bufferIndex == 4) {                       // Check if the buffer contains a 4-character name starting with '#'
+        buffer[bufferIndex] = '\0';                 // Null-terminate the buffer 
+        if (buffer[0] == '#') {                     // if the buffer starts with # execute the if statement
+          Serial.print("Detected name: ");          // print the string 
+          Serial.println(buffer);                   // print the buffer
+          nameDetected = String(buffer);            // Save the detected name
+          break;                                    // break while loop 
         } else {
-          // Shift buffer content to the left by one position and reset bufferIndex
-          for (int i = 0; i < 3; i++) {
+          for (int i = 0; i < 3; i++) {             // Shift buffer content to the left by one position and reset bufferIndex
             buffer[i] = buffer[i + 1];
           }
           bufferIndex = 3;
@@ -372,6 +361,19 @@ void send_detections(){
     {species = "Dixonius";}
   else if (radio_frequency > 10 && magnetic == "S")
     {species = "Cophotis";}
+
+
+  //   void send_detections(){
+  // // The four posibilities of species each tested with unique if conditions
+  // if (IR_frequency > 550 && IR_frequency < 650)
+  //   {species = "Abronia";}
+  // else if (radio_frequency > 80 && radio_frequency < 150)
+  //   {species = "Elgaria";}
+  // else if (IR_frequency > 400 && IR_frequency < 500)
+  //   {species = "Dixonius";}
+  // else if (radio_frequency > 160 && radio_frequency < 250)
+  //   {species = "Cophotis";}
+
 
   applyCORSHeaders();
   String response = "{\"name\": \"" + nameDetected + "\", \"infrared\": \"" + String(IR_frequency) + "\", \"radio\": \"" + String(radio_frequency) + "\", \"magnetic\": \"" + magnetic + "\", \"species\": \"" + species + "\"}";
@@ -501,4 +503,34 @@ void setup() {
 void loop() {
  server.handleClient(); 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
