@@ -37,9 +37,13 @@ bool messageComplete = false;             // Indicates message completion
 static char buffer[5];                    // Buffer to store 4 characters + null terminator
 static int bufferIndex = 0;               // Index to track the buffer position
 
-unsigned long lastTime = 0;
-unsigned long currentTime = 0;
-unsigned long interval = 0;
+unsigned long lastTimeIR = 0;
+unsigned long currentTimeIR = 0;
+unsigned long intervalIR = 0;
+unsigned long lastTimeRA = 0;
+unsigned long currentTimeRA = 0;
+unsigned long intervalRA = 0;
+
 
 bool lastStateIR = LOW;
 bool currentStateIR = LOW;
@@ -139,6 +143,32 @@ void turnRight() {
   analogWrite(PWM1_PIN, 100); 
   digitalWrite(DIR2_PIN, LOW);
   analogWrite(PWM2_PIN, 100); 
+}
+
+
+void turnLeftSlow() {
+  applyCORSHeaders();
+  server.send(200, F("text/plain"), F("Left"));
+  Serial.println("Turn Left");
+  stopMotors(); // Ensure motors are stopped before changing direction
+  delay(100); // Brief delay to ensure motors stop
+  digitalWrite(DIR1_PIN, LOW);
+  analogWrite(PWM1_PIN, 40); 
+  digitalWrite(DIR2_PIN, HIGH);
+  analogWrite(PWM2_PIN, 40); 
+
+}
+// Turn right movement control for rover
+void turnRightSlow() {
+  applyCORSHeaders();
+  server.send(200, F("text/plain"), F("Right"));
+  Serial.println("Turn Right");
+  stopMotors(); // Ensure motors are stopped before changing direction
+  delay(100); // Brief delay to ensure motors stop
+  digitalWrite(DIR1_PIN, HIGH);
+  analogWrite(PWM1_PIN, 40); 
+  digitalWrite(DIR2_PIN, LOW);
+  analogWrite(PWM2_PIN, 40); 
 }
 
 void turnForwardLeft() {
@@ -277,10 +307,10 @@ void detectRadio(){
       currentStateRadio = digitalRead(signalPinRadio);
       if (currentStateRadio != lastStateRadio) { // Check if state has changed
         if (currentStateRadio == HIGH) { // Check for a rising edge
-          currentTime = micros(); // Get the current time in microseconds
-          interval = currentTime - lastTime; // Calculate the time interval
-          lastTime = currentTime; // Update the last time
-          radio_frequency = 1000000.0 / interval; // Calculate the frequency in Hz
+          currentTimeRA = micros(); // Get the current time in microseconds
+          intervalRA = currentTimeRA - lastTimeRA; // Calculate the time interval
+          lastTimeRA = currentTimeRA; // Update the last time
+          radio_frequency = 1000000.0 / intervalRA; // Calculate the frequency in Hz
           Serial.print("Radio Frequency: ");
           Serial.print(radio_frequency);
           Serial.println(" Hz");
@@ -292,7 +322,7 @@ void detectRadio(){
 
 void resetRadio(){
   radio_frequency = 0;
-  interval = 0;
+  intervalRA = 0;
 }
 
 void detectIR(){
@@ -302,10 +332,10 @@ void detectIR(){
       currentStateIR = digitalRead(signalPinIR);
       if (currentStateIR != lastStateIR) { // Check if state has changed
         if (currentStateIR == HIGH) { // Check for a rising edge
-          currentTime = micros(); // Get the current time in microseconds
-          interval = currentTime - lastTime; // Calculate the time interval
-          lastTime = currentTime; // Update the last time
-          IR_frequency = 1000000.0 / interval; // Calculate the frequency in Hz
+          currentTimeIR = micros(); // Get the current time in microseconds
+          intervalIR = currentTimeIR - lastTimeIR; // Calculate the time interval
+          lastTimeIR = currentTimeIR; // Update the last time
+          IR_frequency = 1000000.0 / intervalIR; // Calculate the frequency in Hz
           Serial.print("IR Frequency: ");
           Serial.print(IR_frequency);
           Serial.println(" Hz");
@@ -317,8 +347,9 @@ void detectIR(){
 
 void resetIR(){
   IR_frequency = 0;
-  interval = 0;
+  intervalIR = 0;
 }
+
 
 void Reset_all() {
   resetName();
@@ -445,6 +476,8 @@ void setup() {
   server.on("/backward", HTTP_GET, moveBackward);
   server.on("/left", HTTP_GET, turnLeft);
   server.on("/right", HTTP_GET, turnRight);
+  server.on("/leftslow", HTTP_GET, turnLeftSlow);
+  server.on("/rightslow", HTTP_GET, turnRightSlow);
   server.on(F("/forwardLeft"), turnForwardLeft);
   server.on(F("/forwardRight"), turnForwardRight);
   server.on("/stop", HTTP_GET, stopMotors);
@@ -464,3 +497,9 @@ void setup() {
 void loop() {
  server.handleClient(); 
 }
+
+
+
+
+
+
